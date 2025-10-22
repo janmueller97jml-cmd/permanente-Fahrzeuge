@@ -2,6 +2,26 @@
 
 Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert.
 
+## [1.1.0] - 2025-10-22
+
+### Hinzugefügt
+- **Automatisches Fahrzeug-Respawn-System**: Fahrzeuge werden jetzt kontinuierlich überwacht und automatisch respawnt, wenn sie gelöscht werden
+- Monitoring-Thread der alle 5 Sekunden prüft, ob geparkte Fahrzeuge noch existieren
+- Schutz gegen versehentliches Respawnen wenn Spieler im Fahrzeug sitzt
+- Automatische Aktualisierung der Fahrzeugposition wenn ein geparktes Fahrzeug bewegt wird
+- Neuer Client-Event `permanente-fahrzeuge:removeVehicleFromTracking` für saubere Fahrzeug-Entfernung
+- Erweiterte Debug-Logs für Respawn-Aktivitäten
+
+### Geändert
+- `SpawnParkedVehicle` ist jetzt eine separate Funktion für bessere Code-Wiederverwendung
+- Verbesserte Fahrzeug-Tracking-Logik auf Client-Seite
+- Server benachrichtigt jetzt alle Clients beim Entfernen eines Fahrzeugs
+
+### Behoben
+- **Hauptproblem**: Fahrzeuge respawnen jetzt automatisch nach Löschung (ohne Server-Restart erforderlich)
+- Verhindert Duplikate wenn Spieler in ein geparktes Fahrzeug einsteigt
+- Verbesserte Synchronisation zwischen gespeicherten Positionen und tatsächlichen Fahrzeugpositionen
+
 ## [1.0.0] - 2025-10-22
 
 ### Hinzugefügt
