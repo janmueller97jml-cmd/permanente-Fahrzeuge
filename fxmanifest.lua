@@ -3,7 +3,7 @@ game 'gta5'
 
 author 'permanente-Fahrzeuge'
 description 'Permanent vehicle persistence system - saves vehicle positions and restores them after server restart'
-version '1.0.0'
+version '1.1.0'
 
 server_scripts {
     '@mysql-async/lib/MySQL.lua',

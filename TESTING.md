@@ -161,6 +161,68 @@ SELECT COUNT(*) FROM owned_vehicles WHERE plate = 'FREMDES_KENNZEICHEN';
 ✅ Kein signifikanter FPS-Drop beim Spawnen
 ✅ Alle Fahrzeuge werden korrekt geladen
 
+## Test 7: Fahrzeug Respawn (Neu)
+
+### Schritt 1: Fahrzeug löschen
+1. Aktiviere Debug-Modus (`Config.Debug = true`)
+2. Spawne ein Fahrzeug, das in `owned_vehicles` existiert
+3. Fahre zu einer Position und verlasse das Fahrzeug
+4. Warte bis das Fahrzeug gespawnt ist (Server-Log prüfen)
+5. Verwende einen Admin-Befehl oder andere Methode um das Fahrzeug zu löschen (z.B. `/dv` oder andere Delete-Befehle)
+
+### Schritt 2: Respawn beobachten
+1. Warte maximal 5-10 Sekunden
+2. Prüfe die Client-Logs
+
+### Erwartetes Ergebnis
+✅ Client-Log zeigt: "Vehicle [PLATE] was deleted, respawning..."
+✅ Fahrzeug erscheint wieder an der gleichen Position
+✅ Schäden werden wiederhergestellt
+✅ Dies geschieht automatisch ohne Server-Restart
+
+### Schritt 3: Mehrfaches Löschen
+1. Lösche das Fahrzeug erneut
+2. Warte wieder 5-10 Sekunden
+
+### Erwartetes Ergebnis
+✅ Fahrzeug respawnt wieder
+✅ Kein Crash oder Fehler
+✅ Performance bleibt stabil
+
+## Test 8: Fahrzeug bewegen und Respawn
+
+### Schritt 1: Geparktes Fahrzeug bewegen
+1. Spawne ein Fahrzeug an Position A
+2. Steige ein und fahre zu Position B
+3. Verlasse das Fahrzeug an Position B
+4. Warte 5 Minuten (oder kürzer je nach SaveInterval)
+
+### Schritt 2: Fahrzeug löschen
+1. Lösche das Fahrzeug an Position B
+2. Warte 5-10 Sekunden
+
+### Erwartetes Ergebnis
+✅ Fahrzeug respawnt an Position B (nicht an der ursprünglichen Position A)
+✅ Debug-Log zeigt: "Updated parked vehicle position: [PLATE]"
+
+## Test 9: Fahrzeug-Entfernung aus System
+
+### Schritt 1: Fahrzeug aus Tracking entfernen
+1. Spawne ein Fahrzeug
+2. Verwende den Server-Event `permanente-fahrzeuge:removeVehicle` mit dem Kennzeichen
+3. Beobachte die Logs
+
+### Schritt 2: Prüfe Datenbank
+```sql
+SELECT parking_position FROM owned_vehicles WHERE plate = 'TEST123';
+```
+
+### Erwartetes Ergebnis
+✅ `parking_position` ist NULL in der Datenbank
+✅ Fahrzeug wird vom Client gelöscht
+✅ Fahrzeug respawnt NICHT wieder
+✅ Client-Log zeigt: "Removed vehicle from tracking: [PLATE]"
+
 ## Fehlerbehebung während des Tests
 
 ### Problem: Fahrzeuge werden nicht gespeichert
@@ -174,6 +236,13 @@ SELECT COUNT(*) FROM owned_vehicles WHERE plate = 'FREMDES_KENNZEICHEN';
 - Prüfe Server-Logs auf Fehler
 - Stelle sicher, dass parking_position nicht NULL ist in DB
 - Prüfe ob Resource nach Framework geladen wird
+
+### Problem: Fahrzeuge respawnen nicht nach Löschung (Neu)
+**Lösung:**
+- Aktiviere Debug-Modus und prüfe Logs
+- Stelle sicher, dass der Client-Thread läuft
+- Prüfe ob das Fahrzeug in ParkedVehiclesData gespeichert ist
+- Fahrzeug sollte innerhalb von 5 Sekunden respawnen
 
 ### Problem: Schäden werden nicht wiederhergestellt
 **Lösung:**
@@ -191,6 +260,9 @@ Nach erfolgreichen Tests solltest du:
 - ✅ Nur owned_vehicles werden gespeichert
 - ✅ Mehrere Fahrzeuge funktionieren gleichzeitig
 - ✅ Performance ist akzeptabel
+- ✅ Fahrzeuge respawnen automatisch nach Löschung (Neu)
+- ✅ Fahrzeugpositionen werden aktualisiert wenn bewegt (Neu)
+- ✅ Fahrzeuge können korrekt aus dem System entfernt werden (Neu)
 
 Wenn alle Tests bestehen, kannst du:
 1. `Config.Debug = false` setzen

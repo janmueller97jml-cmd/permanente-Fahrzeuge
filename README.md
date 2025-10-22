@@ -6,6 +6,7 @@ Ein FiveM Script zur dauerhaften Speicherung von Fahrzeugpositionen. Nach einem 
 
 - ✅ Automatische Speicherung der Fahrzeugposition für alle Fahrzeuge in der `owned_vehicles` Datenbank
 - ✅ Wiederherstellung der Fahrzeuge nach Server-Restart an der exakten Position
+- ✅ **Automatisches Respawnen von gelöschten Fahrzeugen** (Neu in v1.1)
 - ✅ Speicherung und Wiederherstellung von Fahrzeugschäden (Karosserie, Motor, Tank, Fenster, Türen, Reifen)
 - ✅ Periodische Aktualisierung der Position (konfigurierbar)
 - ✅ Keine Löschung von Fahrzeugen - sie bleiben persistent
@@ -58,6 +59,8 @@ Beim Server-Start:
 
 **Hinweis:** Das Script verwendet ein Retry-System, um sicherzustellen, dass Fahrzeuge auch dann korrekt spawnen, wenn Clients sich verbinden bevor der Server die Fahrzeuge aus der Datenbank geladen hat.
 
+**Neu in v1.1:** Das System überwacht kontinuierlich alle gespawnten Fahrzeuge. Falls ein Fahrzeug durch andere Scripts, Game-Engine-Cleanup oder manuelle Löschung entfernt wird, wird es automatisch innerhalb von 5 Sekunden an seiner letzten gespeicherten Position respawnt. Dies stellt sicher, dass geparkte Fahrzeuge niemals verloren gehen, auch ohne Server-Neustart.
+
 ### Datenstruktur
 
 **parking_position** (JSON):
@@ -99,6 +102,7 @@ Beim Server-Start:
 - `permanente-fahrzeuge:receiveParkedVehicles` - Empfängt Liste der zu spawnenden Fahrzeuge
 - `permanente-fahrzeuge:vehiclesReady` - Benachrichtigt Clients, dass Server Fahrzeuge geladen hat
 - `permanente-fahrzeuge:vehiclesNotReady` - Signalisiert, dass Server noch nicht bereit ist (Client wird automatisch wiederholen)
+- `permanente-fahrzeuge:removeVehicleFromTracking` - Entfernt ein Fahrzeug aus dem Client-Tracking (Neu in v1.1)
 
 ## Anforderungen
 
