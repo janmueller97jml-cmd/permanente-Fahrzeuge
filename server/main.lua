@@ -159,6 +159,9 @@ AddEventHandler('permanente-fahrzeuge:removeVehicle', function(plate)
     if TrackedVehicles[plate] then
         TrackedVehicles[plate] = nil
     end
+    
+    -- Notify all clients to remove this vehicle from their tracking
+    TriggerClientEvent('permanente-fahrzeuge:removeVehicleFromTracking', -1, plate)
 end)
 
 print('[permanente-Fahrzeuge] Server script loaded')
