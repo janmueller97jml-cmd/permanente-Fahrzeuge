@@ -1,5 +1,6 @@
 local TrackedVehicles = {}
 local SpawnedVehicles = {}
+local ParkedVehiclesData = {} -- Store parked vehicle data for respawning
 
 -- Debug print function
 local function DebugPrint(message)
@@ -125,8 +126,7 @@ local function SaveVehiclePosition(vehicle)
 end
 
 -- Spawn a parked vehicle
-RegisterNetEvent('permanente-fahrzeuge:spawnVehicle')
-AddEventHandler('permanente-fahrzeuge:spawnVehicle', function(model, position, damage)
+local function SpawnParkedVehicle(model, position, damage, plate)
     local modelHash = GetHashKey(model)
     
     RequestModel(modelHash)
@@ -146,14 +146,19 @@ AddEventHandler('permanente-fahrzeuge:spawnVehicle', function(model, position, d
             ApplyVehicleDamage(vehicle, damage)
         end
         
-        local plate = GetVehiclePlate(vehicle)
-        SpawnedVehicles[plate] = vehicle
+        local vehiclePlate = GetVehiclePlate(vehicle)
+        SpawnedVehicles[vehiclePlate] = vehicle
         
-        TriggerServerEvent('permanente-fahrzeuge:vehicleSpawned', plate)
-        DebugPrint('Spawned vehicle: ' .. plate .. ' at ' .. position.x .. ', ' .. position.y .. ', ' .. position.z)
+        TriggerServerEvent('permanente-fahrzeuge:vehicleSpawned', vehiclePlate)
+        DebugPrint('Spawned vehicle: ' .. vehiclePlate .. ' at ' .. position.x .. ', ' .. position.y .. ', ' .. position.z)
     end
     
     SetModelAsNoLongerNeeded(modelHash)
+end
+
+RegisterNetEvent('permanente-fahrzeuge:spawnVehicle')
+AddEventHandler('permanente-fahrzeuge:spawnVehicle', function(model, position, damage)
+    SpawnParkedVehicle(model, position, damage)
 end)
 
 -- Receive parked vehicles from server
@@ -162,8 +167,15 @@ AddEventHandler('permanente-fahrzeuge:receiveParkedVehicles', function(parkedVeh
     DebugPrint('Received ' .. #parkedVehicles .. ' parked vehicles from server')
     
     for _, vehicleData in ipairs(parkedVehicles) do
+        -- Store parked vehicle data for respawning
+        ParkedVehiclesData[vehicleData.plate] = {
+            model = vehicleData.model,
+            position = vehicleData.position,
+            damage = vehicleData.damage
+        }
+        
         -- Spawn each vehicle
-        TriggerEvent('permanente-fahrzeuge:spawnVehicle', vehicleData.model, vehicleData.position, vehicleData.damage)
+        SpawnParkedVehicle(vehicleData.model, vehicleData.position, vehicleData.damage, vehicleData.plate)
     end
 end)
 
@@ -256,6 +268,23 @@ CreateThread(function()
                 SaveVehiclePosition(currentVehicle)
             end
             currentVehicle = 0
+        end
+    end
+end)
+
+-- Monitor spawned parked vehicles and respawn if deleted
+CreateThread(function()
+    while true do
+        Wait(5000) -- Check every 5 seconds
+        
+        for plate, vehicleData in pairs(ParkedVehiclesData) do
+            local spawnedVehicle = SpawnedVehicles[plate]
+            
+            -- Check if vehicle exists or needs to be respawned
+            if not spawnedVehicle or not DoesEntityExist(spawnedVehicle) then
+                DebugPrint('Vehicle ' .. plate .. ' was deleted, respawning...')
+                SpawnParkedVehicle(vehicleData.model, vehicleData.position, vehicleData.damage, plate)
+            end
         end
     end
 end)
