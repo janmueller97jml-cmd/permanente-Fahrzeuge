@@ -167,6 +167,21 @@ AddEventHandler('permanente-fahrzeuge:receiveParkedVehicles', function(parkedVeh
     end
 end)
 
+-- Handle case where vehicles aren't ready yet
+RegisterNetEvent('permanente-fahrzeuge:vehiclesNotReady')
+AddEventHandler('permanente-fahrzeuge:vehiclesNotReady', function()
+    DebugPrint('Server not ready, retrying in 5 seconds...')
+    Wait(5000)
+    TriggerServerEvent('permanente-fahrzeuge:requestParkedVehicles')
+end)
+
+-- Handle vehicles ready notification from server
+RegisterNetEvent('permanente-fahrzeuge:vehiclesReady')
+AddEventHandler('permanente-fahrzeuge:vehiclesReady', function()
+    DebugPrint('Server vehicles are ready, requesting parked vehicles')
+    TriggerServerEvent('permanente-fahrzeuge:requestParkedVehicles')
+end)
+
 -- Track vehicles periodically
 CreateThread(function()
     while true do
@@ -203,7 +218,7 @@ end)
 AddEventHandler('playerSpawned', function()
     Wait(5000) -- Wait 5 seconds after spawn to avoid conflicts
     TriggerServerEvent('permanente-fahrzeuge:requestParkedVehicles')
-    DebugPrint('Requested parked vehicles from server')
+    DebugPrint('Requested parked vehicles from server (playerSpawned)')
 end)
 
 -- On resource start, request parked vehicles
@@ -212,9 +227,9 @@ AddEventHandler('onClientResourceStart', function(resourceName)
         return
     end
     
-    Wait(10000) -- Wait 10 seconds to ensure everything is loaded
+    Wait(5000) -- Wait 5 seconds to ensure everything is loaded
     TriggerServerEvent('permanente-fahrzeuge:requestParkedVehicles')
-    DebugPrint('Client loaded, requesting parked vehicles')
+    DebugPrint('Client loaded, requesting parked vehicles (onClientResourceStart)')
 end)
 
 -- Track when player enters a vehicle
