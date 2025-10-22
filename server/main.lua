@@ -1,4 +1,5 @@
 local TrackedVehicles = {}
+local VehiclesLoaded = false
 
 -- Debug print function
 local function DebugPrint(message)
@@ -61,6 +62,10 @@ AddEventHandler('onResourceStart', function(resourceName)
                 end
             end
             print('[permanente-Fahrzeuge] Loaded ' .. #results .. ' parked vehicles')
+            VehiclesLoaded = true
+            
+            -- Notify all clients that vehicles are ready to be spawned
+            TriggerClientEvent('permanente-fahrzeuge:vehiclesReady', -1)
         end
     end)
 end)
@@ -106,6 +111,14 @@ end)
 RegisterNetEvent('permanente-fahrzeuge:requestParkedVehicles')
 AddEventHandler('permanente-fahrzeuge:requestParkedVehicles', function()
     local _source = source
+    
+    -- If vehicles haven't loaded yet, notify client to retry
+    if not VehiclesLoaded then
+        DebugPrint('Client requested vehicles before loading completed, sending retry signal')
+        TriggerClientEvent('permanente-fahrzeuge:vehiclesNotReady', _source)
+        return
+    end
+    
     local parkedVehicles = {}
     
     for plate, data in pairs(TrackedVehicles) do

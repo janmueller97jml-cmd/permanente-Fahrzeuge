@@ -52,8 +52,11 @@ Das Script prüft automatisch, ob ein Fahrzeug in der `owned_vehicles` Tabelle e
 
 Beim Server-Start:
 1. Lädt das Script alle Fahrzeuge aus `owned_vehicles` mit gespeicherter `parking_position`
-2. Spawnt die Fahrzeuge an ihrer letzten Position
-3. Stellt den Schadenszustand wieder her
+2. Benachrichtigt alle verbundenen Clients, dass Fahrzeuge bereit zum Spawnen sind
+3. Clients fordern die Fahrzeugliste an und spawnen die Fahrzeuge an ihrer letzten Position
+4. Stellt den Schadenszustand wieder her
+
+**Hinweis:** Das Script verwendet ein Retry-System, um sicherzustellen, dass Fahrzeuge auch dann korrekt spawnen, wenn Clients sich verbinden bevor der Server die Fahrzeuge aus der Datenbank geladen hat.
 
 ### Datenstruktur
 
@@ -94,6 +97,8 @@ Beim Server-Start:
 
 - `permanente-fahrzeuge:spawnVehicle` - Spawnt ein Fahrzeug mit Position und Schaden
 - `permanente-fahrzeuge:receiveParkedVehicles` - Empfängt Liste der zu spawnenden Fahrzeuge
+- `permanente-fahrzeuge:vehiclesReady` - Benachrichtigt Clients, dass Server Fahrzeuge geladen hat
+- `permanente-fahrzeuge:vehiclesNotReady` - Signalisiert, dass Server noch nicht bereit ist (Client wird automatisch wiederholen)
 
 ## Anforderungen
 
